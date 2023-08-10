@@ -14,6 +14,7 @@ import { CreatePlayerDTO } from '../dtos/create-player.dto';
 import { PlayersService } from '../services/players.service';
 import { Player } from '../interfaces/player.interface';
 import { ValidationParamsPipe } from '../pipes/validation-params.pipe';
+import { UpdatePlayerDTO } from '../dtos/update-player.dto';
 
 @Controller('api/v1/players')
 export class PlayersController {
@@ -28,7 +29,7 @@ export class PlayersController {
   @Put(':_id')
   async update(
     @Param('_id', ValidationParamsPipe) _id: string,
-    @Body() player: CreatePlayerDTO,
+    @Body() player: UpdatePlayerDTO,
   ) {
     await this.playersService.update(_id, player);
   }

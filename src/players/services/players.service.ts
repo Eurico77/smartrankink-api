@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Player } from '../interfaces/player.interface';
 import { CreatePlayerDTO } from '../dtos/create-player.dto';
+import { UpdatePlayerDTO } from '../dtos/update-player.dto';
 
 @Injectable()
 export class PlayersService {
@@ -24,10 +25,10 @@ export class PlayersService {
     await playerCreated.save();
   }
 
-  async update(_id: string, playerUpdate: CreatePlayerDTO) {
+  async update(_id: string, playerUpdate: UpdatePlayerDTO) {
     const userAlreadyExists = await this.playerModel
       .findOne({
-        email: playerUpdate.email,
+        _id,
       })
       .exec();
 
