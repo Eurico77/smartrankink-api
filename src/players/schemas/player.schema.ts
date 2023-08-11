@@ -27,6 +27,6 @@ export const PlayerSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    collection: 'players',
+    collection: 'Player',
   },
 );

@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
 
-export const Category = new mongoose.Schema(
+export const CategorySchema = new mongoose.Schema(
   {
     description: {
       type: String,
@@ -23,7 +23,7 @@ export const Category = new mongoose.Schema(
     players: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'players',
+        ref: 'Category',
       },
     ],
   },
