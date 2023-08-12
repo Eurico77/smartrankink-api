@@ -6,7 +6,11 @@ const DB_CONNECTION =
   'mongodb://root:root@localhost:27017/smartranking?authSource=admin';
 
 @Module({
-  imports: [MongooseModule.forRoot(DB_CONNECTION), PlayersModule, CategoriesModule],
+  imports: [
+    MongooseModule.forRoot(DB_CONNECTION),
+    PlayersModule,
+    CategoriesModule,
+  ],
   controllers: [],
   providers: [],
 })

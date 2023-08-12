@@ -4,16 +4,18 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, isValidObjectId } from 'mongoose';
 import { Category } from '../interfaces/categories.interface';
 import { CreateCategoryDTO } from '../dtos/create-category.dto';
 import { UpdateCategoryDTO } from '../dtos/update-category.dto';
 import { RequestCategory } from '../interfaces/category-request.interface';
+import { PlayersService } from 'src/players/services/players.service';
 
 @Injectable()
 export class CategoriesService {
   constructor(
     @InjectModel('Category') private readonly categoryModel: Model<Category>,
+    private readonly playersService: PlayersService,
   ) {}
 
   async save(data: CreateCategoryDTO): Promise<Category> {
@@ -22,7 +24,7 @@ export class CategoriesService {
   }
 
   async show(): Promise<Array<Category>> {
-    return await this.categoryModel.find().populate('players', 'name').exec();
+    return await this.categoryModel.find().populate('players').exec();
   }
 
   async updateCategory(
@@ -46,17 +48,26 @@ export class CategoriesService {
       .findOne({ category })
       .exec();
 
+    const playerAlreadyExist = await this.playersService.findById(playerId);
+    const playerExistsInCategory = await this.categoryModel
+      .find({ category })
+      .where('players')
+      .in(playerId as any)
+      .exec();
+
+    if (!isValidObjectId(playerId))
+      throw new BadRequestException('Invalid player ID');
     if (!categoryExists) throw new BadRequestException('Category not exists');
+    if (!playerAlreadyExist) throw new BadRequestException('Player not exists');
+    if (playerExistsInCategory)
+      throw new BadRequestException('Player already register in category ');
 
     await this.categoryModel
-      .findOneAndUpdate(
+      .updateOne(
         { category },
         {
-          $set: {
-            players: playerId,
-          },
+          $push: { players: playerId },
         },
-        { upsert: true },
       )
       .exec();
   }

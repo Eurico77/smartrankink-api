@@ -10,11 +10,10 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { CreatePlayerDTO } from '../dtos/create-player.dto';
-
 import { PlayersService } from '../services/players.service';
 import { Player } from '../interfaces/player.interface';
-import { ValidationParamsPipe } from '../pipes/validation-params.pipe';
 import { UpdatePlayerDTO } from '../dtos/update-player.dto';
+import { ValidationParamsPipe } from 'src/common/pipes/validation-params.pipe';
 
 @Controller('api/v1/players')
 export class PlayersController {
