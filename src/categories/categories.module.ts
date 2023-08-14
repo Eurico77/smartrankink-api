@@ -17,5 +17,6 @@ import { PlayersModule } from 'src/players/players.module';
   ],
   providers: [CategoriesService],
   controllers: [CategoriesController],
+  exports: [CategoriesService],
 })
 export class CategoriesModule {}
