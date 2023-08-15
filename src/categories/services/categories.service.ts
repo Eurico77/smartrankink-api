@@ -71,4 +71,14 @@ export class CategoriesService {
       )
       .exec();
   }
+
+  async showCategoryPlayer(_id: any): Promise<Category> {
+    const player = await this.playersService.findById(_id);
+    if (!player) throw new BadRequestException('Player not exists');
+    return await this.categoryModel
+      .findOne()
+      .where('players')
+      .in(_id as any)
+      .exec();
+  }
 }
