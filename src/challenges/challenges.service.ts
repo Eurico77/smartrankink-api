@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { CategoriesService } from 'src/categories/services/categories.service';
 import { CreateChallengeDto } from './dtos/create-challenge.dto';
 import { PlayersService } from 'src/players/services/players.service';
@@ -7,6 +12,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ChallengeStatus } from './interfaces/challenge-status.enum';
 import { UpdateChallengerDTO } from './dtos/update-challenge.dto';
+import { ChallengeMatchDto } from './dtos/add-challenge-match.dto';
 
 @Injectable()
 export class ChallengesService {
@@ -96,5 +102,43 @@ export class ChallengesService {
     await this.challengeModel
       .findOneAndUpdate({ _id }, { $set: findChallenge })
       .exec();
+  }
+
+  async atribuirDesafioPartida(
+    _id: string,
+    addChallengeMatch: ChallengeMatchDto,
+  ): Promise<void> {
+    const findChallenge = await this.challengeModel.findById(_id).exec();
+
+    if (!findChallenge)
+      throw new BadRequestException(`Desafio ${_id} não cadastrado!`);
+
+    const playersFilter = findChallenge.players.filter(
+      (jogador) => jogador._id == addChallengeMatch.def,
+    );
+
+    this.logger.log(`findChallenge: ${findChallenge}`);
+    this.logger.log(`playersFilter: ${playersFilter}`);
+
+    if (playersFilter.length == 0)
+      throw new BadRequestException(
+        `O jogador vencedor não faz parte do desafio!`,
+      );
+
+    const partidaCriada = new this.matchModel(addChallengeMatch);
+    partidaCriada.category = findChallenge.category;
+    partidaCriada.players = findChallenge.players;
+    const result = await partidaCriada.save();
+    findChallenge.status = ChallengeStatus.COMPLETED;
+    findChallenge.match = result._id;
+
+    try {
+      await this.challengeModel
+        .findOneAndUpdate({ _id }, { $set: findChallenge })
+        .exec();
+    } catch (error) {
+      await this.challengeModel.deleteOne({ _id: result._id }).exec();
+      throw new InternalServerErrorException();
+    }
   }
 }
